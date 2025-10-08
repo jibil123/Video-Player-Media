@@ -1,7 +1,8 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player_media/application/presentation/screens/home_screen/hom_screen.dart';
+import 'package:video_player_media/application/controller/home_screen_feed_controller.dart';
+import 'package:video_player_media/application/presentation/screens/home_screen/home_screen.dart';
 import 'package:video_player_media/data/service/auth_service.dart';
 import 'package:video_player_media/domain/repo/auth_repo.dart';
 import 'package:video_player_media/service/local_storage/shared_preference.dart';
@@ -17,10 +18,7 @@ class AuthController extends ChangeNotifier {
       notifyListeners();
       print('login called');
       final result = await authService.login(
-        loginModel: {
-          'country_code': '+91',
-          'phone': phoneController.text,
-        },
+        loginModel: {'country_code': '+91', 'phone': phoneController.text},
       );
       result.fold(
         (failure) {
@@ -41,7 +39,9 @@ class AuthController extends ChangeNotifier {
           notifyListeners();
           log('login success');
           print("tokennn ${success.token}");
-          await SharedPreference.saveToken(tokenData: success.token?.access ?? '');
+          await SharedPreference.saveToken(
+            tokenData: success.token?.access ?? '',
+          );
           log('added to shared preference');
           print('authantication successful');
           ScaffoldMessenger.of(context).showSnackBar(
@@ -53,7 +53,8 @@ class AuthController extends ChangeNotifier {
               duration: const Duration(seconds: 3),
             ),
           );
-          // context.read<HomePageController>().getPatientList();
+          context.read<HomeScreenFeedController>().getAllCategories();
+          context.read<HomeScreenFeedController>().getHomeScreenFeeds();
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => HomeScreen()),
             (Route<dynamic> route) => false,
