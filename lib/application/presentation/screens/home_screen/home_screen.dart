@@ -1,12 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_player_media/application/controller/home_screen_feed_controller.dart';
+import 'package:video_player_media/application/controller/my_feed_controller.dart';
 import 'package:video_player_media/application/presentation/screens/add_video.dart/add_video.dart';
+import 'package:video_player_media/application/presentation/screens/my_feeds/my_feeds.dart';
 import 'package:video_player_media/domain/model/home_page_feed/home_page_feed.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,14 +20,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.redAccent,
+        backgroundColor: const Color.fromARGB(255, 198, 41, 29),
         shape: CircleBorder(),
         onPressed: () {
           Navigator.of(
             context,
           ).push(MaterialPageRoute(builder: (context) => AddPostScreen()));
         },
-        child: Icon(Icons.add),
+        child: Icon(Icons.add, fontWeight: FontWeight.bold, size: 35),
       ),
       backgroundColor: Colors.black,
       body: Consumer<HomeScreenFeedController>(
@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
         top: MediaQuery.of(context).padding.top + 10,
         left: 16,
         right: 16,
-        bottom: 10,
+        bottom: 30,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -73,27 +73,30 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 'Hello ${user?.name ?? 'Maria'}',
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 4),
               const Text(
                 'Welcome back to Section',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(color: Colors.white70, fontSize: 13),
               ),
             ],
           ),
-          CircleAvatar(
-            radius: 22,
-            backgroundImage: user?.image != null && user!.image!.isNotEmpty
-                ? NetworkImage(user.image!)
-                : null,
-            child: user?.image == null || user!.image!.isEmpty
-                ? const Icon(Icons.person, color: Colors.white)
-                : null,
+          GestureDetector(
+            onTap: () {
+              context.read<MyFeedController>().getMyFeeds();
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (context) => MyFeedScreen()));
+            },
+            child: CircleAvatar(
+              radius: 22,
+              backgroundImage: AssetImage('assets/images/Logo.png'),
+            ),
           ),
         ],
       ),
@@ -103,25 +106,65 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCategories(HomeScreenFeedController controller) {
     final categories = controller.categories.categories ?? [];
     return SizedBox(
-      height: 45,
+      height: 38,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         separatorBuilder: (_, __) => const SizedBox(width: 10),
-        itemCount: categories.length,
-        itemBuilder: (context, index) => Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: Colors.grey),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          child: Center(
-            child: Text(
-              categories[index].title ?? '',
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+        itemCount: categories.length + 1,
+        itemBuilder: (context, index) {
+          // 👇 First item is Explore
+          if (index == 0) {
+            return Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.red),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      const Image(
+                        image: AssetImage('assets/icons/ankr-(ankr).png'),
+                        height: 16,
+                        width: 16,
+                      ),
+                      const SizedBox(width: 7),
+                      const Text(
+                        'Explore',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(width: 1, height: 30, color: Colors.grey.shade800),
+              ],
+            );
+          }
+
+          // 👇 Adjust index since 0th slot is Explore
+          final category = categories[index - 1];
+
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: Colors.grey),
             ),
-          ),
-        ),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+            child: Center(
+              child: Text(
+                category.title ?? '',
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -186,18 +229,20 @@ class _FeedItemState extends State<FeedItem> {
     final user = widget.feed.user;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E),
-        borderRadius: BorderRadius.circular(20),
-      ),
+      margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            leading: Icon(Icons.person),
-            title: Text(user?.name ?? ''),
-            subtitle: const Text('5 days ago'),
+            leading: CircleAvatar(
+              backgroundImage: AssetImage('assets/images/image 7.png'),
+            ),
+            title: Text(
+              user?.name ?? 'you',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: const Text('5 days ago', style: TextStyle(fontSize: 12)),
           ),
           if (_controller != null && _isVideoInitialized)
             GestureDetector(
@@ -294,9 +339,28 @@ class _FeedItemState extends State<FeedItem> {
             // Thumbnail while loading
             Container(
               color: Colors.black,
-              height: 220,
               child: widget.feed.image != null
-                  ? Image.network(widget.feed.image!, fit: BoxFit.cover)
+                  ? Image.network(
+                      widget.feed.image!,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Shimmer.fromColors(
+                          baseColor: Colors.grey[800]!,
+                          highlightColor: Colors.grey[700]!,
+                          child: Container(
+                            width: double.infinity,
+                            height: 200, // same height as your image/video
+                            color: Colors.grey[800],
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(Icons.broken_image, color: Colors.white),
+                        );
+                      },
+                    )
                   : const Center(
                       child: Icon(Icons.video_library, color: Colors.white),
                     ),

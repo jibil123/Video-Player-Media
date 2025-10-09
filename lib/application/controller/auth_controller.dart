@@ -43,10 +43,10 @@ class AuthController extends ChangeNotifier {
             tokenData: success.token?.access ?? '',
           );
           log('added to shared preference');
-          print('authantication successful');
+          print('authentication successful');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Authantification successfully done'),
+              content: Text('Authentification successfully done'),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
               margin: const EdgeInsets.all(10),
