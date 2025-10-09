@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player_media/application/controller/auth_controller.dart';
 import 'package:video_player_media/application/controller/home_screen_feed_controller.dart';
+import 'package:video_player_media/application/controller/my_feed_controller.dart';
 import 'package:video_player_media/application/presentation/screens/login_screen/login_screen.dart';
 
 void main() {
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => AuthController()),
         ChangeNotifierProvider(create: (context) => HomeScreenFeedController()),
+        ChangeNotifierProvider(create: (context) => MyFeedController()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
